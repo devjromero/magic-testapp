@@ -1,12 +1,42 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { Image, StyleSheet, Platform, TouchableOpacity, Text } from 'react-native';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { Magic } from '@magic-sdk/react-native-expo';
+import { OAuthExtension } from '@magic-ext/react-native-expo-oauth';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useCallback } from 'react';
+import * as Linking from 'expo-linking';
 
+const magic = new Magic('<PROJECTID>', {
+    extensions: [
+        new OAuthExtension()
+    ],
+});
 export default function HomeScreen() {
+const onLogin = useCallback(
+  async () => {
+    try {
+      const response = await magic.oauth.loginWithPopup({provider:'google',redirectURI:Linking.createURL('exp://'),});
+      console.log(response)
+      alert(JSON.stringify(response))
+    } catch (error) {
+      console.log(error)
+      alert(JSON.stringify(error))
+    }
+
+
+  },
+  [],
+)
+
+
   return (
+    <SafeAreaProvider>
+
+    <magic.Relayer/>
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
       headerImage={
@@ -18,6 +48,11 @@ export default function HomeScreen() {
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Welcome!</ThemedText>
         <HelloWave />
+      </ThemedView>
+      <ThemedView style={styles.titleContainer}>
+        <TouchableOpacity onPress={onLogin}>
+          <ThemedText>Login with Google</ThemedText>
+        </TouchableOpacity>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
         <ThemedText type="subtitle">Step 1: Try it</ThemedText>
@@ -47,6 +82,7 @@ export default function HomeScreen() {
         </ThemedText>
       </ThemedView>
     </ParallaxScrollView>
+    </SafeAreaProvider>
   );
 }
 
